@@ -1,0 +1,37 @@
+PhysioVitale
+Erstanamnese
+
+
+
+
+
+
+SCHRITT 1 VON 5
+Aktuelle Beschwerden
+Name
+Geburtsdatum
+Beschreibung der Beschwerden
+Schmerzstärke (0 = kein Schmerz · 10 = Maximalschmerz)
+
+0
+Kein Schmerz
+Maximalschmerz
+Beschwerdebeginn
+Art des Beginns
+Plötzlich
+Schleichend
+Nach Unfall
+Nach Operation
+Unbekannt
+Beschwerdelokalisation
+Mit dem Finger auf die Körperskizze zeichnen
+
+
+
+
+
+●
+●●
+✕ Löschen
+🟠 Schmerz  🔴 Starker Schmerz  🔵 Kribbeln / Taubheit
+Weiter →
