@@ -580,7 +580,11 @@ function initCanvas(){
     canvas.width=w; canvas.height=h;
     if(!img.offsetHeight) outer.style.minHeight=h+'px';
   };
-  img.onload=resize;
+  if(img.complete && img.naturalHeight > 0){
+    resize();
+  } else {
+    img.onload=resize;
+  }
   window.addEventListener('resize',resize);
   setTimeout(resize,400);
 
