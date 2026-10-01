@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Aufgaben">
+<meta name="theme-color" content="#E8731A">
+<title>Aufgaben – PhysioVitale Heidelberg</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --orange:#E8731A; --orange-soft:#FCEBDC;
+  --ink:#22292C; --muted:#6B7377; --line:#E6E3DE; --paper:#FFFFFF; --bg:#F6F5F2;
+  --ok:#4F8A5B; --ok-soft:#E3F0E5; --late:#C23B2A; --late-soft:#F9E1DD; --soon:#C98A0E; --soon-soft:#FBF0D6;
+  --font:"Atkinson Hyperlegible",-apple-system,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);-webkit-text-size-adjust:100%}
+body{padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
+
+.wrap{max-width:900px;margin:0 auto;padding:20px 20px 120px}
+
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;padding:12px 0 18px;border-bottom:4px solid var(--orange)}
+header h1{margin:0;font-size:34px;line-height:1.1;letter-spacing:-.01em}
+header p{margin:4px 0 0;color:var(--muted);font-size:16px}
+.summary{text-align:right;font-size:15px;color:var(--muted);line-height:1.4}
+.summary b{color:var(--late);font-size:28px;display:block;line-height:1}
+.summary b.zero{color:var(--ok)}
+
+.toolbar{display:flex;gap:10px;align-items:center;margin:18px 0 6px;flex-wrap:wrap}
+.seg{display:flex;background:#ECEAE6;border-radius:12px;padding:4px}
+.seg button{border:0;background:none;padding:10px 18px;border-radius:9px;font-size:16px;color:var(--muted)}
+.seg button.on{background:var(--paper);color:var(--ink);font-weight:700;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.spacer{flex:1}
+.ghost{border:1.5px solid var(--line);background:var(--paper);padding:10px 16px;border-radius:12px;font-size:16px}
+.ghost.on{border-color:var(--orange);color:var(--orange);font-weight:700}
+
+.banner{display:none;margin:14px 0 0;padding:12px 16px;border-radius:12px;background:var(--late-soft);color:var(--late);font-size:15px}
+.banner.show{display:block}
+
+h2{font-size:15px;color:var(--muted);font-weight:700;margin:28px 0 8px;padding-left:4px}
+
+.list{background:var(--paper);border-radius:16px;overflow:hidden;border:1px solid var(--line)}
+.task{display:grid;grid-template-columns:1fr auto;gap:4px 16px;align-items:center;width:100%;text-align:left;border:0;background:none;padding:16px 18px 18px;position:relative;border-top:1px solid var(--line)}
+.task:first-child{border-top:0}
+.task:active{background:#FAF8F5}
+.task .name{font-size:19px;line-height:1.3;font-weight:700}
+.task .meta{font-size:15px;color:var(--muted);grid-column:1}
+.pill{grid-row:1 / span 2;grid-column:2;font-size:14px;font-weight:700;padding:7px 12px;border-radius:999px;white-space:nowrap}
+.pill.late{background:var(--late-soft);color:var(--late)}
+.pill.soon{background:var(--soon-soft);color:var(--soon)}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.edit{background:var(--orange-soft);color:var(--orange)}
+/* Füllstand: läuft über den Turnus leer */
+.gauge{position:absolute;left:18px;right:18px;bottom:8px;height:4px;border-radius:2px;background:#EFEDEA;overflow:hidden}
+.gauge i{display:block;height:100%;border-radius:2px;background:var(--ok);transition:width .4s ease}
+.gauge i.soon{background:var(--soon)} .gauge i.late{background:var(--late)}
+
+.empty{padding:28px 18px;text-align:center;color:var(--muted);font-size:17px}
+
+.add{margin-top:24px;width:100%;padding:16px;border-radius:14px;border:2px dashed #D6D2CB;background:none;font-size:17px;color:var(--muted)}
+
+/* Sheet */
+.scrim{position:fixed;inset:0;background:rgba(20,24,26,.38);display:none;align-items:flex-end;justify-content:center;z-index:10}
+.scrim.show{display:flex}
+.sheet{background:var(--paper);width:100%;max-width:640px;border-radius:22px 22px 0 0;padding:22px 24px calc(24px + env(safe-area-inset-bottom,0));max-height:90vh;overflow:auto;animation:up .22s ease-out}
+@media (min-width:700px){.scrim{align-items:center}.sheet{border-radius:22px}}
+@keyframes up{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.sheet{animation:none}.gauge i{transition:none}}
+.sheet h3{margin:0 0 4px;font-size:24px;line-height:1.25}
+.sheet .sub{color:var(--muted);margin:0 0 20px;font-size:16px}
+label.f{display:block;font-size:15px;font-weight:700;margin:16px 0 8px}
+.in{width:100%;padding:14px 16px;border:1.5px solid var(--line);border-radius:12px;font-size:18px;background:#fff}
+.in:focus{border-color:var(--orange);outline:none}
+.kz{text-transform:uppercase;letter-spacing:.06em;max-width:160px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chip{border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:9px 14px;font-size:16px;font-weight:700;letter-spacing:.04em}
+.chip.on{background:var(--orange);border-color:var(--orange);color:#fff}
+.datebtns{display:flex;gap:8px;flex-wrap:wrap}
+.primary{width:100%;margin-top:24px;padding:17px;border:0;border-radius:14px;background:var(--orange);color:#fff;font-size:19px;font-weight:700}
+.primary:disabled{opacity:.45}
+.secondary{width:100%;margin-top:10px;padding:14px;border:0;border-radius:14px;background:none;color:var(--muted);font-size:17px}
+.danger{color:var(--late)}
+.hist{margin:22px 0 0;padding:0;list-style:none;border-top:1px solid var(--line)}
+.hist li{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--line);font-size:16px}
+.hist button{border:0;background:none;color:var(--muted);font-size:14px;padding:6px 8px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0));transform:translateX(-50%);background:var(--ink);color:#fff;padding:13px 20px;border-radius:12px;font-size:16px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:20}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Praxisaufgaben</h1>
+      <p>PhysioVitale Heidelberg</p>
+    </div>
+    <div class="summary" id="summary"></div>
+  </header>
+
+  <div class="toolbar">
+    <div class="seg" role="tablist">
+      <button id="fDue" class="on" onclick="setFilter('due')">Fällig</button>
+      <button id="fAll" onclick="setFilter('all')">Alle</button>
+    </div>
+    <div class="spacer"></div>
+    <button class="ghost" id="editBtn" onclick="toggleEdit()">Liste bearbeiten</button>
+  </div>
+
+  <div class="banner" id="banner"></div>
+  <div id="content"><div class="empty">Lade Aufgaben …</div></div>
+</div>
+
+<div class="scrim" id="scrim" onclick="if(event.target===this)closeSheet()">
+  <div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const API = "https://physiovitale.de/aufgaben_api.php";
+const TURNUS = [[1,"täglich"],[7,"wöchentlich"],[14,"alle 2 Wochen"],[30,"monatlich"],[91,"vierteljährlich"],[182,"halbjährlich"],[365,"jährlich"]];
+const AREAS_DEFAULT = ["Material & Geräte","Behandlungsräume & Hygiene","Empfang, Wartebereich & Allgemein"];
+
+let data = {tasks:[],log:[]};
+let filter = "due", editMode = false, busy = false;
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const todayISO = () => { const d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,10); };
+const isoShift = n => { const d=new Date(); d.setDate(d.getDate()+n); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,10); };
+const fmt = iso => { const [y,m,d]=iso.split("-"); return `${d}.${m}.${y.slice(2)}`; };
+const daysBetween = (a,b) => Math.round((new Date(b+"T12:00")-new Date(a+"T12:00"))/864e5);
+const turnusName = n => (TURNUS.find(t=>t[0]===n)||[0,`alle ${n} Tage`])[1];
+
+function recentKz(){ try{ return JSON.parse(localStorage.getItem("pv_kz")||"[]"); }catch(e){ return []; } }
+function rememberKz(k){ try{ const l=[k,...recentKz().filter(x=>x!==k)].slice(0,12); localStorage.setItem("pv_kz",JSON.stringify(l)); }catch(e){} }
+function allKz(){
+  const fromLog = [...new Set(data.log.slice().reverse().map(l=>l.by))];
+  return [...new Set([...recentKz(), ...fromLog])].slice(0,14);
+}
+
+function status(t){
+  const entries = data.log.filter(l=>l.taskId===t.id).sort((a,b)=>b.date.localeCompare(a.date)||String(b.at).localeCompare(String(a.at)));
+  const last = entries[0];
+  if(!last) return {cls:"late", label:"noch nie erledigt", left:-1, pct:0, last:null, entries};
+  const since = daysBetween(last.date, todayISO());
+  const left = t.every - since;
+  const pct = Math.max(0, Math.min(100, 100*left/t.every));
+  let cls="ok", label;
+  if(left<0){ cls="late"; label = -left===1 ? "seit 1 Tag fällig" : `seit ${-left} Tagen fällig`; }
+  else if(left===0){ cls="late"; label="heute fällig"; }
+  else if(left <= Math.max(1, Math.round(t.every*0.2))){ cls="soon"; label = left===1 ? "morgen fällig" : `in ${left} Tagen fällig`; }
+  else label = `in ${left} Tagen`;
+  return {cls,label,left,pct,last,entries};
+}
+
+async function load(){
+  try{
+    const r = await fetch(API, {cache:"no-store"});
+    if(!r.ok) throw 0;
+    data = await r.json();
+    banner("");
+  }catch(e){ banner("Keine Verbindung zum Server. Bitte WLAN prüfen – Einträge werden gerade nicht gespeichert."); }
+  render();
+}
+
+async function send(body){
+  if(busy) return false; busy = true;
+  try{
+    const r = await fetch(API, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body)});
+    const j = await r.json();
+    if(!r.ok || j.error) throw new Error(j.error||"Fehler");
+    data = j; banner(""); render(); return true;
+  }catch(e){
+    toast(e.message && e.message!=="Failed to fetch" ? e.message : "Nicht gespeichert – keine Verbindung.");
+    return false;
+  }finally{ busy = false; }
+}
+
+function banner(t){ const b=$("#banner"); b.textContent=t; b.classList.toggle("show",!!t); }
+let tt; function toast(t){ const el=$("#toast"); el.textContent=t; el.classList.add("show"); clearTimeout(tt); tt=setTimeout(()=>el.classList.remove("show"),2400); }
+
+function setFilter(f){ filter=f; $("#fDue").classList.toggle("on",f==="due"); $("#fAll").classList.toggle("on",f==="all"); render(); }
+function toggleEdit(){ editMode=!editMode; $("#editBtn").classList.toggle("on",editMode); $("#editBtn").textContent = editMode ? "Fertig" : "Liste bearbeiten"; render(); }
+
+function render(){
+  const st = Object.fromEntries(data.tasks.map(t=>[t.id,status(t)]));
+  const dueCount = data.tasks.filter(t=>st[t.id].cls==="late").length;
+  $("#summary").innerHTML = dueCount ? `<b>${dueCount}</b>${dueCount===1?"Aufgabe fällig":"Aufgaben fällig"}` : `<b class="zero">0</b>alles erledigt`;
+
+  const areas = [...new Set([...AREAS_DEFAULT.filter(a=>data.tasks.some(t=>t.area===a)), ...data.tasks.map(t=>t.area)])];
+  let html = "";
+  for(const a of areas){
+    let ts = data.tasks.filter(t=>t.area===a);
+    if(!editMode && filter==="due") ts = ts.filter(t=>st[t.id].cls!=="ok");
+    if(!ts.length) continue;
+    if(!editMode) ts.sort((x,y)=>st[x.id].left-st[y.id].left);
+    html += `<h2>${esc(a)}</h2><div class="list">`;
+    for(const t of ts){
+      const s = st[t.id];
+      const meta = turnusName(t.every) + (s.last ? `, zuletzt ${fmt(s.last.date)} von ${esc(s.last.by)}` : "");
+      html += `<button class="task" onclick="${editMode?`openEdit('${t.id}')`:`openDone('${t.id}')`}">
+        <span class="name">${esc(t.name)}</span>
+        <span class="pill ${editMode?"edit":s.cls}">${editMode?"Bearbeiten":s.label}</span>
+        <span class="meta">${meta}</span>
+        ${editMode?"":`<span class="gauge"><i class="${s.cls}" style="width:${s.pct}%"></i></span>`}
+      </button>`;
+    }
+    html += `</div>`;
+  }
+  if(!html) html = `<div class="list"><div class="empty">Gerade ist nichts fällig. Unter „Alle“ siehst du die komplette Liste.</div></div>`;
+  if(editMode) html += `<button class="add" onclick="openEdit(null)">+ Aufgabe hinzufügen</button>`;
+  $("#content").innerHTML = html;
+}
+
+/* ---------- Erledigt eintragen ---------- */
+let sel = {kz:"", date:""};
+function openDone(id){
+  const t = data.tasks.find(x=>x.id===id); if(!t) return;
+  const s = status(t);
+  sel = {kz:"", date:todayISO()};
+  const chips = allKz().map(k=>`<button class="chip" data-kz="${esc(k)}" onclick="pickKz('${esc(k)}')">${esc(k)}</button>`).join("");
+  const hist = s.entries.slice(0,6).map(l=>`<li><span>${fmt(l.date)} – ${esc(l.by)}</span><button onclick="undo('${l.id}')">Löschen</button></li>`).join("");
+  $("#sheet").innerHTML = `
+    <h3>${esc(t.name)}</h3>
+    <p class="sub">${turnusName(t.every)}, ${s.label}</p>
+    <label class="f" for="kz">Dein Kürzel</label>
+    <input class="in kz" id="kz" maxlength="6" autocomplete="off" autocapitalize="characters" placeholder="z. B. SM" oninput="typeKz(this.value)">
+    ${chips?`<div class="chips">${chips}</div>`:""}
+    <label class="f">Erledigt am</label>
+    <div class="datebtns">
+      <button class="chip on" data-d="0" onclick="pickDate(0)">Heute</button>
+      <button class="chip" data-d="-1" onclick="pickDate(-1)">Gestern</button>
+      <input class="in" type="date" id="dt" value="${sel.date}" max="${todayISO()}" style="max-width:220px" onchange="sel.date=this.value;markDate(null)">
+    </div>
+    <button class="primary" id="go" disabled onclick="complete('${t.id}')">Als erledigt eintragen</button>
+    <button class="secondary" onclick="closeSheet()">Abbrechen</button>
+    ${hist?`<ul class="hist">${hist}</ul>`:""}`;
+  openSheet();
+}
+function typeKz(v){ sel.kz=v.trim().toUpperCase(); document.querySelectorAll(".chip[data-kz]").forEach(c=>c.classList.toggle("on",c.dataset.kz===sel.kz)); $("#go").disabled=!sel.kz; }
+function pickKz(k){ $("#kz").value=k; typeKz(k); }
+function pickDate(n){ sel.date=isoShift(n); $("#dt").value=sel.date; markDate(n); }
+function markDate(n){ document.querySelectorAll(".chip[data-d]").forEach(c=>c.classList.toggle("on",n!==null&&+c.dataset.d===n)); }
+async function complete(id){
+  if(!sel.kz||!sel.date) return;
+  const ok = await send({action:"complete",taskId:id,by:sel.kz,date:sel.date});
+  if(ok){ rememberKz(sel.kz); closeSheet(); toast("Erledigt eingetragen"); }
+}
+async function undo(logId){
+  if(!confirm("Diesen Eintrag löschen?")) return;
+  if(await send({action:"undo",logId})){ closeSheet(); toast("Eintrag gelöscht"); }
+}
+
+/* ---------- Liste bearbeiten ---------- */
+function openEdit(id){
+  const t = id ? data.tasks.find(x=>x.id===id) : {id:"",name:"",area:AREAS_DEFAULT[0],every:30};
+  const areas = [...new Set([...AREAS_DEFAULT, ...data.tasks.map(x=>x.area)])];
+  $("#sheet").innerHTML = `
+    <h3>${id?"Aufgabe bearbeiten":"Neue Aufgabe"}</h3>
+    <label class="f" for="en">Aufgabe</label>
+    <input class="in" id="en" value="${esc(t.name)}" placeholder="z. B. Wasserkocher entkalken">
+    <label class="f" for="ea">Bereich</label>
+    <select class="in" id="ea" onchange="$('#eaNew').style.display=this.value==='__new'?'block':'none'">
+      ${areas.map(a=>`<option ${a===t.area?"selected":""}>${esc(a)}</option>`).join("")}
+      <option value="__new">Neuer Bereich …</option>
+    </select>
+    <input class="in" id="eaNew" style="display:none;margin-top:10px" placeholder="Name des Bereichs">
+    <label class="f" for="et">Wie oft?</label>
+    <select class="in" id="et">${TURNUS.map(([n,l])=>`<option value="${n}" ${n===t.every?"selected":""}>${l}</option>`).join("")}</select>
+    <button class="primary" onclick="saveTask('${t.id}')">Speichern</button>
+    ${id?`<button class="secondary danger" onclick="delTask('${t.id}')">Aufgabe löschen</button>`:""}
+    <button class="secondary" onclick="closeSheet()">Abbrechen</button>`;
+  openSheet();
+}
+async function saveTask(id){
+  const name=$("#en").value.trim();
+  let area=$("#ea").value; if(area==="__new") area=$("#eaNew").value.trim();
+  if(!name||!area){ toast("Bitte Aufgabe und Bereich ausfüllen"); return; }
+  if(await send({action:"saveTask",task:{id,name,area,every:+$("#et").value}})){ closeSheet(); toast("Gespeichert"); }
+}
+async function delTask(id){
+  if(!confirm("Aufgabe samt Verlauf löschen?")) return;
+  if(await send({action:"deleteTask",id})){ closeSheet(); toast("Aufgabe gelöscht"); }
+}
+
+function openSheet(){ $("#scrim").classList.add("show"); }
+function closeSheet(){ $("#scrim").classList.remove("show"); }
+
+load();
+setInterval(()=>{ if(!$("#scrim").classList.contains("show")) load(); }, 30000);
+document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) load(); });
+</script>
+</body>
+</html>
