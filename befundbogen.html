@@ -1307,7 +1307,8 @@ function sendEmail() {
     mftNote:     document.getElementById('mft-note').value,
     schwellung:  document.getElementById('sw-ja').classList.contains('active-ja') ? 'ja' : document.getElementById('sw-nein').classList.contains('active-nein') ? 'nein' : '–',
     reflexe:     document.getElementById('reflexe').value,
-    bodyImg: bodyImgData, hwsImg, bwsImg, lwsImg, cranioImg
+    // send_befund.php erwartet frontImg/backImg – Körperskizze + Notizen als ein Bild unter frontImg
+    frontImg: bodyImgData, backImg: '', bodyImg: bodyImgData, hwsImg, bwsImg, lwsImg, cranioImg
   };
 
   const btn    = document.getElementById('btn-email');
