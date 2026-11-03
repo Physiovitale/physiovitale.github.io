@@ -722,9 +722,6 @@
   <!-- Body Sketch -->
   <div class="card">
     <div class="card-title">Körperskizze</div>
-        <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
-      <button class="clear-btn" onclick="withUndo('canvas-body', clearCanvases)">✕ Löschen</button>
-    </div>
     
         <div class="canvas-section">
       <div class="canvas-wrapper" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px">
@@ -737,9 +734,6 @@
   <!-- Freies Schreibfeld -->
   <div class="card">
     <div class="card-title">Notizen</div>
-    <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
-      <button class="clear-btn" onclick="withUndo('canvas-notiz', clearNotizCanvas)">✕ Löschen</button>
-    </div>
     <canvas class="body-canvas" id="canvas-notiz" width="760" height="700"></canvas>
   </div>
 
@@ -753,7 +747,6 @@
   <div class="region-block">
     <div class="region-header" style="display:flex;align-items:center;justify-content:space-between">
       <span>Kopf, HWS, Schultergürtel, Arm</span>
-      <button class="clear-btn" style="color:var(--red);border-color:var(--red);background:transparent;font-size:11px;padding:3px 10px" onclick="withUndo('canvas-hws', () => clearRegionCanvas('canvas-hws'))\">✕ Löschen</button>
     </div>
     <div style="background:var(--white);border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px">
       <canvas id="canvas-hws" style="display:block;width:100%;touch-action:none;cursor:crosshair;border-radius:0 0 8px 8px" width="900" height="180"></canvas>
@@ -763,7 +756,6 @@
   <div class="region-block">
     <div class="region-header" style="display:flex;align-items:center;justify-content:space-between">
       <span>BWS, Thorax</span>
-      <button class="clear-btn" style="color:var(--red);border-color:var(--red);background:transparent;font-size:11px;padding:3px 10px" onclick="withUndo('canvas-bws', () => clearRegionCanvas('canvas-bws'))\">✕ Löschen</button>
     </div>
     <div style="background:var(--white);border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px">
       <canvas id="canvas-bws" style="display:block;width:100%;touch-action:none;cursor:crosshair;border-radius:0 0 8px 8px" width="900" height="180"></canvas>
@@ -773,7 +765,6 @@
   <div class="region-block">
     <div class="region-header" style="display:flex;align-items:center;justify-content:space-between">
       <span>LWS, Becken, Bein</span>
-      <button class="clear-btn" style="color:var(--red);border-color:var(--red);background:transparent;font-size:11px;padding:3px 10px" onclick="withUndo('canvas-lws', () => clearRegionCanvas('canvas-lws'))\">✕ Löschen</button>
     </div>
     <div style="background:var(--white);border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px">
       <canvas id="canvas-lws" style="display:block;width:100%;touch-action:none;cursor:crosshair;border-radius:0 0 8px 8px" width="900" height="180"></canvas>
@@ -783,7 +774,6 @@
   <div class="region-block">
     <div class="region-header" style="display:flex;align-items:center;justify-content:space-between">
       <span>Cranio / Viszeral</span>
-      <button class="clear-btn" style="color:var(--red);border-color:var(--red);background:transparent;font-size:11px;padding:3px 10px" onclick="withUndo('canvas-cranio', () => clearRegionCanvas('canvas-cranio'))\">✕ Löschen</button>
     </div>
     <div style="background:var(--white);border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px">
       <canvas id="canvas-cranio" style="display:block;width:100%;touch-action:none;cursor:crosshair;border-radius:0 0 8px 8px" width="900" height="180"></canvas>
